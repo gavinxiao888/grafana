@@ -251,7 +251,7 @@ func TestRouteCreateSilence(t *testing.T) {
 			name:    "new silence, role-based access control is enabled, not authorized",
 			silence: silenceGen(withEmptyID),
 			accessControl: func() accesscontrol.AccessControl {
-				return actest.New()
+				return actest.NewAccesscontrol()
 			},
 			expectedStatus: http.StatusUnauthorized,
 		},
@@ -259,7 +259,7 @@ func TestRouteCreateSilence(t *testing.T) {
 			name:    "new silence, role-based access control is enabled, authorized",
 			silence: silenceGen(withEmptyID),
 			accessControl: func() accesscontrol.AccessControl {
-				return actest.New().WithPermissions([]*accesscontrol.Permission{
+				return actest.NewAccesscontrol().WithPermissions([]*accesscontrol.Permission{
 					{Action: accesscontrol.ActionAlertingInstanceCreate},
 				})
 			},
@@ -269,7 +269,7 @@ func TestRouteCreateSilence(t *testing.T) {
 			name:    "new silence, role-based access control is disabled, Viewer",
 			silence: silenceGen(withEmptyID),
 			accessControl: func() accesscontrol.AccessControl {
-				return actest.New().WithDisabled()
+				return actest.NewAccesscontrol().WithDisabled()
 			},
 			role:           models.ROLE_VIEWER,
 			expectedStatus: http.StatusUnauthorized,
@@ -278,7 +278,7 @@ func TestRouteCreateSilence(t *testing.T) {
 			name:    "new silence, role-based access control is disabled, Editor",
 			silence: silenceGen(withEmptyID),
 			accessControl: func() accesscontrol.AccessControl {
-				return actest.New().WithDisabled()
+				return actest.NewAccesscontrol().WithDisabled()
 			},
 			role:           models.ROLE_EDITOR,
 			expectedStatus: http.StatusAccepted,
@@ -287,7 +287,7 @@ func TestRouteCreateSilence(t *testing.T) {
 			name:    "new silence, role-based access control is disabled, Admin",
 			silence: silenceGen(withEmptyID),
 			accessControl: func() accesscontrol.AccessControl {
-				return actest.New().WithDisabled()
+				return actest.NewAccesscontrol().WithDisabled()
 			},
 			role:           models.ROLE_ADMIN,
 			expectedStatus: http.StatusAccepted,
@@ -296,7 +296,7 @@ func TestRouteCreateSilence(t *testing.T) {
 			name:    "update silence, role-based access control is enabled, not authorized",
 			silence: silenceGen(),
 			accessControl: func() accesscontrol.AccessControl {
-				return actest.New()
+				return actest.NewAccesscontrol()
 			},
 			expectedStatus: http.StatusUnauthorized,
 		},
@@ -304,7 +304,7 @@ func TestRouteCreateSilence(t *testing.T) {
 			name:    "update silence, role-based access control is enabled, authorized",
 			silence: silenceGen(),
 			accessControl: func() accesscontrol.AccessControl {
-				return actest.New().WithPermissions([]*accesscontrol.Permission{
+				return actest.NewAccesscontrol().WithPermissions([]*accesscontrol.Permission{
 					{Action: accesscontrol.ActionAlertingInstanceUpdate},
 				})
 			},
@@ -314,7 +314,7 @@ func TestRouteCreateSilence(t *testing.T) {
 			name:    "update silence, role-based access control is disabled, Viewer",
 			silence: silenceGen(),
 			accessControl: func() accesscontrol.AccessControl {
-				return actest.New().WithDisabled()
+				return actest.NewAccesscontrol().WithDisabled()
 			},
 			role:           models.ROLE_VIEWER,
 			expectedStatus: http.StatusUnauthorized,
@@ -323,7 +323,7 @@ func TestRouteCreateSilence(t *testing.T) {
 			name:    "update silence, role-based access control is disabled, Editor",
 			silence: silenceGen(),
 			accessControl: func() accesscontrol.AccessControl {
-				return actest.New().WithDisabled()
+				return actest.NewAccesscontrol().WithDisabled()
 			},
 			role:           models.ROLE_EDITOR,
 			expectedStatus: http.StatusAccepted,
@@ -332,7 +332,7 @@ func TestRouteCreateSilence(t *testing.T) {
 			name:    "update silence, role-based access control is disabled, Admin",
 			silence: silenceGen(),
 			accessControl: func() accesscontrol.AccessControl {
-				return actest.New().WithDisabled()
+				return actest.NewAccesscontrol().WithDisabled()
 			},
 			role:           models.ROLE_ADMIN,
 			expectedStatus: http.StatusAccepted,
@@ -376,7 +376,7 @@ func createSut(t *testing.T, accessControl accesscontrol.AccessControl) Alertman
 
 	mam := createMultiOrgAlertmanager(t)
 	if accessControl == nil {
-		accessControl = actest.New().WithDisabled()
+		accessControl = actest.NewAccesscontrol().WithDisabled()
 	}
 	log := log.NewNopLogger()
 	return AlertmanagerSrv{

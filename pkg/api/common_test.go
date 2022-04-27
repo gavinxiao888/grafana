@@ -240,7 +240,7 @@ func setupAccessControlScenarioContext(t *testing.T, cfg *setting.Cfg, url strin
 		Features:           features,
 		QuotaService:       &quota.QuotaService{Cfg: cfg},
 		RouteRegister:      routing.NewRouteRegister(),
-		AccessControl:      actest.New().WithPermissions(permissions),
+		AccessControl:      actest.NewAccesscontrol().WithPermissions(permissions),
 		searchUsersService: searchusers.ProvideUsersService(store, filters.ProvideOSSSearchUserFilter()),
 		ldapGroups:         ldap.ProvideGroupsService(),
 	}
@@ -326,7 +326,7 @@ func setupSimpleHTTPServer(features *featuremgmt.FeatureManager) *HTTPServer {
 	return &HTTPServer{
 		Cfg:           cfg,
 		Features:      features,
-		AccessControl: actest.New().WithDisabled(),
+		AccessControl: actest.NewAccesscontrol().WithDisabled(),
 	}
 }
 
@@ -387,7 +387,7 @@ func setupHTTPServerWithCfgDb(t *testing.T, useFakeAccessControl, enableAccessCo
 
 	// Defining the accesscontrol service has to be done before registering routes
 	if useFakeAccessControl {
-		acmock = actest.New()
+		acmock = actest.NewAccesscontrol()
 		if !enableAccessControl {
 			acmock = acmock.WithDisabled()
 		}
@@ -466,7 +466,7 @@ func SetupAPITestServer(t *testing.T, opts ...APITestServerOption) *webtest.Serv
 	hs := &HTTPServer{
 		RouteRegister:      routing.NewRouteRegister(),
 		Cfg:                setting.NewCfg(),
-		AccessControl:      actest.New().WithDisabled(),
+		AccessControl:      actest.NewAccesscontrol().WithDisabled(),
 		Features:           featuremgmt.WithFeatures(),
 		searchUsersService: &searchusers.OSSService{},
 	}

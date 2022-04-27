@@ -20,9 +20,9 @@ import (
 	"github.com/grafana/grafana/pkg/infra/usagestats"
 	"github.com/grafana/grafana/pkg/models"
 	"github.com/grafana/grafana/pkg/services/accesscontrol"
+	"github.com/grafana/grafana/pkg/services/accesscontrol/actest"
 	"github.com/grafana/grafana/pkg/services/accesscontrol/database"
 	acmiddleware "github.com/grafana/grafana/pkg/services/accesscontrol/middleware"
-	accesscontrolmock "github.com/grafana/grafana/pkg/services/accesscontrol/mock"
 	"github.com/grafana/grafana/pkg/services/accesscontrol/ossaccesscontrol"
 	"github.com/grafana/grafana/pkg/services/auth"
 	"github.com/grafana/grafana/pkg/services/contexthandler"
@@ -240,7 +240,7 @@ func setupAccessControlScenarioContext(t *testing.T, cfg *setting.Cfg, url strin
 		Features:           features,
 		QuotaService:       &quota.QuotaService{Cfg: cfg},
 		RouteRegister:      routing.NewRouteRegister(),
-		AccessControl:      accesscontrolmock.New().WithPermissions(permissions),
+		AccessControl:      actest.New().WithPermissions(permissions),
 		searchUsersService: searchusers.ProvideUsersService(store, filters.ProvideOSSSearchUserFilter()),
 		ldapGroups:         ldap.ProvideGroupsService(),
 	}
@@ -274,7 +274,7 @@ type accessControlScenarioContext struct {
 	hs *HTTPServer
 
 	// acmock is an accesscontrol mock used to fake users rights.
-	acmock *accesscontrolmock.Mock
+	acmock *actest.Mock
 
 	// db is a test database initialized with InitTestDB
 	db sqlstore.Store
@@ -285,7 +285,7 @@ type accessControlScenarioContext struct {
 	dashboardsStore dashboards.Store
 }
 
-func setAccessControlPermissions(acmock *accesscontrolmock.Mock, perms []*accesscontrol.Permission, org int64) {
+func setAccessControlPermissions(acmock *actest.Mock, perms []*accesscontrol.Permission, org int64) {
 	acmock.GetUserPermissionsFunc =
 		func(_ context.Context, u *models.SignedInUser, _ accesscontrol.Options) ([]*accesscontrol.Permission, error) {
 			if u.OrgId == org {
@@ -326,7 +326,7 @@ func setupSimpleHTTPServer(features *featuremgmt.FeatureManager) *HTTPServer {
 	return &HTTPServer{
 		Cfg:           cfg,
 		Features:      features,
-		AccessControl: accesscontrolmock.New().WithDisabled(),
+		AccessControl: actest.New().WithDisabled(),
 	}
 }
 
@@ -366,7 +366,7 @@ func setupHTTPServerWithCfgDb(t *testing.T, useFakeAccessControl, enableAccessCo
 	features := featuremgmt.WithFeatures("accesscontrol", enableAccessControl)
 	cfg.IsFeatureToggleEnabled = features.IsEnabled
 
-	var acmock *accesscontrolmock.Mock
+	var acmock *actest.Mock
 
 	dashboardsStore := dashboardsstore.ProvideDashboardStore(db)
 
@@ -381,13 +381,13 @@ func setupHTTPServerWithCfgDb(t *testing.T, useFakeAccessControl, enableAccessCo
 		RouteRegister:      routeRegister,
 		SQLStore:           store,
 		searchUsersService: searchusers.ProvideUsersService(db, filters.ProvideOSSSearchUserFilter()),
-		dashboardService:   dashboardservice.ProvideDashboardService(cfg, dashboardsStore, nil, features, accesscontrolmock.NewPermissionsServicesMock()),
+		dashboardService:   dashboardservice.ProvideDashboardService(cfg, dashboardsStore, nil, features, actest.NewPermissionsServicesMock()),
 		preferenceService:  preftest.NewPreferenceServiceFake(),
 	}
 
 	// Defining the accesscontrol service has to be done before registering routes
 	if useFakeAccessControl {
-		acmock = accesscontrolmock.New()
+		acmock = actest.New()
 		if !enableAccessControl {
 			acmock = acmock.WithDisabled()
 		}
@@ -466,7 +466,7 @@ func SetupAPITestServer(t *testing.T, opts ...APITestServerOption) *webtest.Serv
 	hs := &HTTPServer{
 		RouteRegister:      routing.NewRouteRegister(),
 		Cfg:                setting.NewCfg(),
-		AccessControl:      accesscontrolmock.New().WithDisabled(),
+		AccessControl:      actest.New().WithDisabled(),
 		Features:           featuremgmt.WithFeatures(),
 		searchUsersService: &searchusers.OSSService{},
 	}

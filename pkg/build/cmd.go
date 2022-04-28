@@ -13,6 +13,7 @@ import (
 	"time"
 )
 
+//test
 const (
 	GoOSWindows = "windows"
 	GoOSLinux   = "linux"
